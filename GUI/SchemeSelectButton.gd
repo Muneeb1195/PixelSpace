@@ -1,5 +1,9 @@
 extends Button
 
+## Emitted instead of reaching up to a hardcoded scene-tree path, so this
+## button works no matter where it is instanced or what the root is named.
+signal scheme_chosen(scheme: PackedColorArray)
+
 @export var colorscheme: PackedColorArray
 @onready var colorbutton_scene : PackedScene = preload("res://GUI/ColorPickerButton.tscn")
 
@@ -19,7 +23,7 @@ func _build_swatches() -> void:
 
 func _on_color_changed(color : Color, index : int) -> void:
 	colorscheme[index] = color
-	get_tree().root.get_node("GUI").select_colorscheme(colorscheme)
+	scheme_chosen.emit(colorscheme)
 
 func _on_Button_pressed() -> void:
-	get_tree().root.get_node("GUI").select_colorscheme(colorscheme)
+	scheme_chosen.emit(colorscheme)

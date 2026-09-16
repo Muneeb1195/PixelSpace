@@ -14,6 +14,7 @@ func _ready() -> void:
 	randomize()
 	path = _resolve_export_dir()
 	_apply_platform_resolution_caps()
+	_connect_scheme_buttons()
 	_generate_new()
 	OS.low_processor_usage_mode = true
 	if OS.get_name() == "Android":
@@ -77,9 +78,16 @@ func save_image(img : Image) -> void:
 		filesaver.save_image(img, "Space Background")
 	else:
 		var stamp : String = Time.get_datetime_string_from_system().replace(":", "-")
-		var err : Error = img.save_png(path + "/Space Background " + stamp + ".png")
+		var target : String = path + "/Space Background " + stamp + ".png"
+		var err : Error = img.save_png(target)
 		if err != OK:
 			push_error("PixelSpace: failed to save PNG to %s (error %d)" % [path, err])
+			_show_export_error(target, err)
+
+func _show_export_error(target : String, err : Error) -> void:
+	var dialog : AcceptDialog = $ErrorDialog
+	dialog.dialog_text = "Could not save the image to:\n%s\n\nCheck the folder exists and is writable. (Error %d)" % [target, err]
+	dialog.popup_centered()
 
 func _on_SaveTimer_timeout() -> void:
 	# Ensure the Camera2 UPDATE_ONCE frame has landed before reading pixels.
@@ -94,6 +102,14 @@ func _on_SaveTimer_timeout() -> void:
 func select_colorscheme(scheme : PackedColorArray) -> void:
 	$SubViewport/BackgroundGenerator.set_background_color(scheme[0])
 	global_scheme.gradient.colors = scheme.slice(1,8)
+
+## Preset buttons announce themselves via `scheme_chosen`; wiring by signal
+## keeps this working for any number of presets and any root node name.
+func _connect_scheme_buttons() -> void:
+	var list : VBoxContainer = $HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer
+	for child : Node in list.get_children():
+		if child.has_signal("scheme_chosen"):
+			child.connect("scheme_chosen", select_colorscheme)
 
 func _on_EnableStars_pressed() -> void:
 	generator.toggle_stars()
@@ -123,7 +139,7 @@ func _on_PixelsWidth_value_changed(value : int) -> void:
 
 
 func _on_EnableTransparency_pressed() -> void:
-	generator.toggle_transparancy()
+	generator.toggle_transparency()
 	$HBoxContainer/Control/ColorRect.visible = !$HBoxContainer/Control/ColorRect.visible
 	# The checkerboard only matters when the background is transparent; while
 	# the opaque rect covers it, hide it to skip a full-screen texture sample.

@@ -327,6 +327,11 @@ text = "Export (Press E)"
 wait_time = 0.1
 one_shot = true
 
+[node name="ErrorDialog" type="AcceptDialog" parent="."]
+title = "Export failed"
+dialog_text = "Could not save the image."
+dialog_autowrap = true
+
 [connection signal="pressed" from="HBoxContainer/ColorRect/Settings/NewButton" to="." method="_on_NewButton_pressed"]
 [connection signal="value_changed" from="HBoxContainer/ColorRect/Settings/HBoxContainer/PixelsWidth" to="." method="_on_PixelsWidth_value_changed"]
 [connection signal="value_changed" from="HBoxContainer/ColorRect/Settings/HBoxContainer2/PixelsHeight" to="." method="_on_PixelsHeight_value_changed"]

@@ -173,11 +173,10 @@ func toggle_planets() -> void:
 	planetcontainer.visible = !planetcontainer.visible
 	_request_render_once()
 
-func toggle_transparancy() -> void:
+func toggle_transparency() -> void:
 	$CanvasLayer/Background.visible = !$CanvasLayer/Background.visible
 	_request_render_once()
 
-## Correct spelling; kept the old name as an alias (it is connected to UI
-## and may be referenced from .tscn files or forks).
-func toggle_transparency() -> void:
-	toggle_transparancy()
+## Deprecated alias kept for forks calling the old misspelled name.
+func toggle_transparancy() -> void:
+	toggle_transparency()
