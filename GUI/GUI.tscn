@@ -164,6 +164,127 @@ value = 200.0
 custom_minimum_size = Vector2(0, 5)
 layout_mode = 2
 
+[node name="SeedRow" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/SeedRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "seed:"
+
+[node name="SeedInput" type="LineEdit" parent="HBoxContainer/ColorRect/Settings/SeedRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_length = 10
+placeholder_text = "number"
+
+[node name="SeedApply" type="Button" parent="HBoxContainer/ColorRect/Settings/SeedRow"]
+layout_mode = 2
+text = "Apply"
+
+[node name="SeedRow2" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+
+[node name="SeedLock" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/SeedRow2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "lock seed"
+
+[node name="SeedLabel" type="Label" parent="HBoxContainer/ColorRect/Settings/SeedRow2"]
+layout_mode = 2
+size_flags_horizontal = 3
+clip_text = true
+text = "current: -"
+
+[node name="GenLabel" type="Label" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+text = "generation:"
+
+[node name="AutoCounts" type="CheckBox" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+button_pressed = true
+text = "auto counts"
+
+[node name="PlanetsRow" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/PlanetsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "planets:"
+
+[node name="PlanetsSlider" type="HSlider" parent="HBoxContainer/ColorRect/Settings/PlanetsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+editable = false
+max_value = 12.0
+step = 1.0
+value = 4.0
+
+[node name="PlanetsVal" type="Label" parent="HBoxContainer/ColorRect/Settings/PlanetsRow"]
+layout_mode = 2
+text = "4"
+
+[node name="StarsRow" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/StarsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "stars:"
+
+[node name="StarsSlider" type="HSlider" parent="HBoxContainer/ColorRect/Settings/StarsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+editable = false
+max_value = 300.0
+step = 5.0
+value = 100.0
+
+[node name="StarsVal" type="Label" parent="HBoxContainer/ColorRect/Settings/StarsRow"]
+layout_mode = 2
+text = "100%"
+
+[node name="DustRow" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/DustRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "dust:"
+
+[node name="DustSlider" type="HSlider" parent="HBoxContainer/ColorRect/Settings/DustRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 10.0
+max_value = 200.0
+step = 5.0
+value = 100.0
+
+[node name="DustVal" type="Label" parent="HBoxContainer/ColorRect/Settings/DustRow"]
+layout_mode = 2
+text = "100%"
+
+[node name="NebulaRow" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/NebulaRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "nebulae:"
+
+[node name="NebulaSlider" type="HSlider" parent="HBoxContainer/ColorRect/Settings/NebulaRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 10.0
+max_value = 200.0
+step = 5.0
+value = 100.0
+
+[node name="NebulaVal" type="Label" parent="HBoxContainer/ColorRect/Settings/NebulaRow"]
+layout_mode = 2
+text = "100%"
+
 [node name="Label2" type="Label" parent="HBoxContainer/ColorRect/Settings" unique_id=1405079622]
 layout_mode = 2
 text = "colorscheme:"
@@ -343,4 +464,11 @@ dialog_autowrap = true
 [connection signal="pressed" from="HBoxContainer/ColorRect/Settings/GridContainer/EnableReduceBackground" to="." method="_on_EnableReduceBackground_pressed"]
 [connection signal="pressed" from="HBoxContainer/ColorRect/Settings/EnableTransparency" to="." method="_on_EnableTransparency_pressed"]
 [connection signal="pressed" from="HBoxContainer/ColorRect/Settings/ExportButton" to="." method="_on_ExportButton_pressed"]
+[connection signal="pressed" from="HBoxContainer/ColorRect/Settings/SeedRow/SeedApply" to="." method="_on_SeedApply_pressed"]
+[connection signal="toggled" from="HBoxContainer/ColorRect/Settings/SeedRow2/SeedLock" to="." method="_on_SeedLock_toggled"]
+[connection signal="toggled" from="HBoxContainer/ColorRect/Settings/AutoCounts" to="." method="_on_AutoCounts_toggled"]
+[connection signal="value_changed" from="HBoxContainer/ColorRect/Settings/PlanetsRow/PlanetsSlider" to="." method="_on_PlanetsSlider_value_changed"]
+[connection signal="value_changed" from="HBoxContainer/ColorRect/Settings/StarsRow/StarsSlider" to="." method="_on_StarsSlider_value_changed"]
+[connection signal="value_changed" from="HBoxContainer/ColorRect/Settings/DustRow/DustSlider" to="." method="_on_DustSlider_value_changed"]
+[connection signal="value_changed" from="HBoxContainer/ColorRect/Settings/NebulaRow/NebulaSlider" to="." method="_on_NebulaSlider_value_changed"]
 [connection signal="timeout" from="SaveTimer" to="." method="_on_SaveTimer_timeout"]

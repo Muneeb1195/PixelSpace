@@ -17,8 +17,16 @@ var mirror_size : Vector2i = Vector2(200,200)
 var planet_objects : Array = []
 var star_objects : Array = []
 
-#func _ready() -> void:
-	#OS.low_processor_usage_mode_sleep_usec = 10000
+## User overrides (auto_counts reproduces the legacy random behavior).
+var auto_counts : bool = true
+var planet_count : int = 4
+var star_density : float = 1.0
+var _base_dust_size : float = 10.0
+var _base_nebula_size : float = 10.0
+
+func _ready() -> void:
+	_base_dust_size = float(starstuff.material.get_shader_parameter("size"))
+	_base_nebula_size = float(nebulae.material.get_shader_parameter("size"))
 
 func set_mirror_size(new : Vector2) -> void:
 	mirror_size = new
@@ -87,7 +95,7 @@ func _make_new_stars() -> void:
 	
 	var star_amount : int = int(max(size.x, size.y) / 20)
 	star_amount = max(star_amount, 1)
-	var star_count : int = randi() % star_amount
+	var star_count : int = randi() % star_amount if auto_counts else maxi(0, int(star_amount * star_density))
 	for i : int in star_count:
 		_place_big_star()
 
@@ -97,9 +105,37 @@ func _make_new_planets() -> void:
 	planet_objects = []
 
 	var planet_amount : int = randi_range(5,10) if size.x > 1500 else randi_range(2,5)#int(size.x * size.y) / 8000
-	var planet_count : int = randi() % planet_amount
-	for i : int in planet_count:
+	var spawn_count : int = randi() % planet_amount if auto_counts else maxi(0, planet_count)
+	for i : int in spawn_count:
 		_place_planet()
+
+## Slider-driven overrides. Counts regenerate immediately; density scales
+## only apply on the next regenerate unless counts are manual.
+func set_auto_counts(on : bool) -> void:
+	auto_counts = on
+	_make_new_planets()
+	_make_new_stars()
+	_request_render_once()
+
+func set_planet_count(n : int) -> void:
+	planet_count = maxi(0, n)
+	auto_counts = false
+	_make_new_planets()
+	_request_render_once()
+
+func set_star_density(d : float) -> void:
+	star_density = clampf(d, 0.0, 3.0)
+	auto_counts = false
+	_make_new_stars()
+	_request_render_once()
+
+func set_dust_scale(s : float) -> void:
+	starstuff.material.set_shader_parameter("size", _base_dust_size * clampf(s, 0.1, 2.0))
+	_request_render_once()
+
+func set_nebula_scale(s : float) -> void:
+	nebulae.material.set_shader_parameter("size", _base_nebula_size * clampf(s, 0.1, 2.0))
+	_request_render_once()
 
 func _set_new_colors(new_scheme : GradientTexture2D, new_background : Color) -> void:
 	colorscheme = new_scheme

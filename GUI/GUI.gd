@@ -5,17 +5,32 @@ extends Control
 @onready var viewport : SubViewport = $SubViewport
 @onready var global_scheme : GradientTexture2D = preload("res://BackgroundGenerator/Colorscheme.tres")
 @onready var label_3: Label = $HBoxContainer/ColorRect/Settings/Label3
+@onready var seed_input: LineEdit = $HBoxContainer/ColorRect/Settings/SeedRow/SeedInput
+@onready var seed_lock: CheckBox = $HBoxContainer/ColorRect/Settings/SeedRow2/SeedLock
+@onready var seed_label: Label = $HBoxContainer/ColorRect/Settings/SeedRow2/SeedLabel
+@onready var auto_counts_box: CheckBox = $HBoxContainer/ColorRect/Settings/AutoCounts
+@onready var planets_slider: HSlider = $HBoxContainer/ColorRect/Settings/PlanetsRow/PlanetsSlider
+@onready var planets_val: Label = $HBoxContainer/ColorRect/Settings/PlanetsRow/PlanetsVal
+@onready var stars_slider: HSlider = $HBoxContainer/ColorRect/Settings/StarsRow/StarsSlider
+@onready var stars_val: Label = $HBoxContainer/ColorRect/Settings/StarsRow/StarsVal
+@onready var dust_val: Label = $HBoxContainer/ColorRect/Settings/DustRow/DustVal
+@onready var nebula_val: Label = $HBoxContainer/ColorRect/Settings/NebulaRow/NebulaVal
 
 var new_size : Vector2i = Vector2i(200,200)
 var path : String
 var _exporting : bool = false
+var current_seed : int = 0
+var seed_locked : bool = false
 
 func _ready() -> void:
 	randomize()
+	current_seed = randi()
+	seed(current_seed)
 	path = _resolve_export_dir()
 	_apply_platform_resolution_caps()
 	_connect_scheme_buttons()
 	_generate_new()
+	_update_seed_ui()
 	OS.low_processor_usage_mode = true
 	if OS.get_name() == "Android":
 		OS.request_permissions()
@@ -51,7 +66,64 @@ func _generate_new() -> void:
 	generator.generate_new()
 
 func _on_NewButton_pressed() -> void:
+	if not seed_locked:
+		current_seed = randi()
+	seed(current_seed)
+	_update_seed_ui()
 	_generate_new()
+
+## Replays the exact RNG stream: same seed + size + scheme + toggles
+## reproduces the same image (see tests/parity_capture.gd).
+func _update_seed_ui() -> void:
+	seed_label.text = "current: %d" % current_seed
+	seed_input.placeholder_text = str(current_seed)
+
+func _on_SeedApply_pressed() -> void:
+	var txt : String = seed_input.text.strip_edges()
+	if not txt.is_valid_int():
+		seed_input.text = ""
+		return
+	current_seed = int(txt)
+	seed_locked = true
+	seed_lock.button_pressed = true
+	seed_input.text = ""
+	seed(current_seed)
+	_update_seed_ui()
+	_generate_new()
+
+func _on_SeedLock_toggled(pressed_on : bool) -> void:
+	seed_locked = pressed_on
+
+## Dragging a count slider implies manual control: drop out of auto mode
+## without emitting (avoids a redundant regenerate per drag tick).
+func _manual_counts() -> void:
+	if auto_counts_box.button_pressed:
+		auto_counts_box.set_pressed_no_signal(false)
+		planets_slider.editable = true
+		stars_slider.editable = true
+
+func _on_AutoCounts_toggled(pressed_on : bool) -> void:
+	generator.set_auto_counts(pressed_on)
+	planets_slider.editable = not pressed_on
+	stars_slider.editable = not pressed_on
+
+func _on_PlanetsSlider_value_changed(value : float) -> void:
+	planets_val.text = str(int(value))
+	_manual_counts()
+	generator.set_planet_count(int(value))
+
+func _on_StarsSlider_value_changed(value : float) -> void:
+	stars_val.text = "%d%%" % int(value)
+	_manual_counts()
+	generator.set_star_density(value / 100.0)
+
+func _on_DustSlider_value_changed(value : float) -> void:
+	dust_val.text = "%d%%" % int(value)
+	generator.set_dust_scale(value / 100.0)
+
+func _on_NebulaSlider_value_changed(value : float) -> void:
+	nebula_val.text = "%d%%" % int(value)
+	generator.set_nebula_scale(value / 100.0)
 
 func _on_ExportButton_pressed() -> void:
 	if _exporting:
