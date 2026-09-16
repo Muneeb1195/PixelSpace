@@ -214,6 +214,12 @@ func _show_export_error(target : String, err : Error) -> void:
 	dialog.dialog_text = "Could not save the image to:\n%s\n\nCheck the folder exists and is writable. (Error %d)" % [target, err]
 	dialog.popup_centered()
 
+func _on_About_pressed() -> void:
+	var version : String = str(ProjectSettings.get_setting("application/config/version", "?.?.?"))
+	var dialog : AcceptDialog = $AboutDialog
+	dialog.dialog_text = "SpaceBackground %s\nProcedural pixel-space backgrounds.\n\nTips:\n- Lock the seed to replay an exact image.\n- Enable 'export layers' for parallax-ready PNGs.\n- Code MIT licensed; generated images free for games and projects." % version
+	dialog.popup_centered()
+
 func _on_SaveTimer_timeout() -> void:
 	# Ensure the Camera2 UPDATE_ONCE frame has landed before reading pixels.
 	await RenderingServer.frame_post_draw

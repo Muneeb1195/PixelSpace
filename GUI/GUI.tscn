@@ -517,6 +517,10 @@ layout_mode = 2
 shortcut = SubResource("Shortcut_c1vv3")
 text = "Export (Press E)"
 
+[node name="AboutButton" type="Button" parent="HBoxContainer/ColorRect/SettingsScroll/Settings"]
+layout_mode = 2
+text = "About"
+
 [node name="SaveTimer" type="Timer" parent="." unique_id=1835552269]
 wait_time = 0.1
 one_shot = true
@@ -528,6 +532,10 @@ one_shot = true
 [node name="ErrorDialog" type="AcceptDialog" parent="."]
 title = "Export failed"
 dialog_text = "Could not save the image."
+dialog_autowrap = true
+
+[node name="AboutDialog" type="AcceptDialog" parent="."]
+title = "About SpaceBackground"
 dialog_autowrap = true
 
 [connection signal="pressed" from="HBoxContainer/ColorRect/SettingsScroll/Settings/NewButton" to="." method="_on_NewButton_pressed"]
@@ -546,6 +554,7 @@ dialog_autowrap = true
 [connection signal="pressed" from="HBoxContainer/ColorRect/SettingsScroll/Settings/GridContainer/EnableReduceBackground" to="." method="_on_EnableReduceBackground_pressed"]
 [connection signal="pressed" from="HBoxContainer/ColorRect/SettingsScroll/Settings/EnableTransparency" to="." method="_on_EnableTransparency_pressed"]
 [connection signal="pressed" from="HBoxContainer/ColorRect/SettingsScroll/Settings/ExportButton" to="." method="_on_ExportButton_pressed"]
+[connection signal="pressed" from="HBoxContainer/ColorRect/SettingsScroll/Settings/AboutButton" to="." method="_on_About_pressed"]
 [connection signal="pressed" from="HBoxContainer/ColorRect/SettingsScroll/Settings/SeedRow/SeedApply" to="." method="_on_SeedApply_pressed"]
 [connection signal="toggled" from="HBoxContainer/ColorRect/SettingsScroll/Settings/SeedRow2/SeedLock" to="." method="_on_SeedLock_toggled"]
 [connection signal="toggled" from="HBoxContainer/ColorRect/SettingsScroll/Settings/AutoCounts" to="." method="_on_AutoCounts_toggled"]
