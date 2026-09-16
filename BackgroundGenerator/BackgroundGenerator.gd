@@ -23,20 +23,36 @@ var star_objects : Array = []
 func set_mirror_size(new : Vector2) -> void:
 	mirror_size = new
 
+## The SubViewport runs in UPDATE_ONCE mode (see GUI.tscn) so the heavy
+## full-screen shaders only render on demand. Kick one frame after any
+## visual state change; use _keep_rendering() while particles settle.
+func _request_render_once() -> void:
+	var vp : Viewport = get_viewport()
+	if vp is SubViewport:
+		(vp as SubViewport).set_update_mode(SubViewport.UPDATE_ONCE)
+
+func _keep_rendering() -> void:
+	var vp : Viewport = get_viewport()
+	if vp is SubViewport:
+		(vp as SubViewport).set_update_mode(SubViewport.UPDATE_WHEN_VISIBLE)
+
 func toggle_tile() -> void:
 	should_tile = !should_tile
 	starstuff.material.set_shader_parameter("should_tile", should_tile)
 	nebulae.material.set_shader_parameter("should_tile", should_tile)
-	
+
 	_make_new_planets()
 	_make_new_stars()
+	_request_render_once()
 
 func toggle_reduce_background() -> void:
 	reduce_background = !reduce_background
 	starstuff.material.set_shader_parameter("reduce_background", reduce_background)
 	nebulae.material.set_shader_parameter("reduce_background", reduce_background)
+	_request_render_once()
 
 func generate_new() -> void:
+	_keep_rendering()
 	starstuff.material.set_shader_parameter("seed", randf_range(1.0, 10.0))
 	starstuff.material.set_shader_parameter("pixels", max(size.x, size.y))
 	
@@ -71,16 +87,18 @@ func _make_new_stars() -> void:
 	
 	var star_amount : int = int(max(size.x, size.y) / 20)
 	star_amount = max(star_amount, 1)
-	for i : int in randi()%star_amount:
+	var star_count : int = randi() % star_amount
+	for i : int in star_count:
 		_place_big_star()
-	
+
 func _make_new_planets() -> void:
 	for p : Sprite2D in planet_objects:
 		p.queue_free()
 	planet_objects = []
 
 	var planet_amount : int = randi_range(5,10) if size.x > 1500 else randi_range(2,5)#int(size.x * size.y) / 8000
-	for i : int in randi()%planet_amount:
+	var planet_count : int = randi() % planet_amount
+	for i : int in planet_count:
 		_place_planet()
 
 func _set_new_colors(new_scheme : GradientTexture2D, new_background : Color) -> void:
@@ -95,6 +113,7 @@ func _set_new_colors(new_scheme : GradientTexture2D, new_background : Color) -> 
 		p.material.set_shader_parameter("colorscheme", colorscheme)
 	for s : Sprite2D in star_objects:
 		s.material.set_shader_parameter("colorscheme", colorscheme)
+	_request_render_once()
 
 func _place_planet() -> void:
 	var min_size : int = min(size.x, size.y)
@@ -129,23 +148,36 @@ func _place_big_star() -> void:
 func _on_PauseParticles_timeout() -> void:
 	particles.speed_scale = 0.0
 	particles.emitting = false
+	# Particles have settled: freeze the viewport until the next change.
+	_request_render_once()
 
 func set_background_color(c : Color) -> void:
 	background.color = c
 	nebulae.material.set_shader_parameter("background_color", c)
+	_request_render_once()
 
 func toggle_dust() -> void:
 	starstuff.visible = !starstuff.visible
+	_request_render_once()
 
 func toggle_stars() -> void:
 	starcontainer.visible = !starcontainer.visible
 	particles.visible = !particles.visible
+	_request_render_once()
 
 func toggle_nebulae() -> void:
 	$Nebulae.visible = !$Nebulae.visible
+	_request_render_once()
 
 func toggle_planets() -> void:
 	planetcontainer.visible = !planetcontainer.visible
+	_request_render_once()
 
 func toggle_transparancy() -> void:
 	$CanvasLayer/Background.visible = !$CanvasLayer/Background.visible
+	_request_render_once()
+
+## Correct spelling; kept the old name as an alias (it is connected to UI
+## and may be referenced from .tscn files or forks).
+func toggle_transparency() -> void:
+	toggle_transparancy()

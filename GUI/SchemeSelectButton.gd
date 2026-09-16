@@ -4,6 +4,11 @@ extends Button
 @onready var colorbutton_scene : PackedScene = preload("res://GUI/ColorPickerButton.tscn")
 
 func _ready() -> void:
+	# 13 presets x up to 9 pickers built eagerly = ~100 popups in one frame.
+	# Defer so each button builds on its own idle tick; visuals unchanged.
+	_build_swatches.call_deferred()
+
+func _build_swatches() -> void:
 	for i : int in colorscheme.size():
 		var b : ColorPickerButton = ColorPickerButton.new()
 

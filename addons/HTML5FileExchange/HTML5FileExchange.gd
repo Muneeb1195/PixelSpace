@@ -2,8 +2,13 @@ extends Node
 
 signal InFocus
 
+## Godot 4 reports the web platform as "Web" (not "HTML5") and exposes it
+## via the "web" feature flag. Centralize the check here.
+static func is_web() -> bool:
+	return OS.has_feature("web")
+
 func _ready():
-	if OS.get_name() == "HTML5" and OS.has_feature('JavaScript'):
+	if is_web():
 		_define_js()
 
 
@@ -51,7 +56,7 @@ func _define_js()->void:
 	
 	
 func load_image()->Image:
-	if OS.get_name() != "HTML5" or !OS.has_feature('JavaScript'):
+	if not is_web():
 		return
 		
 	#Execute js function
@@ -109,7 +114,7 @@ func load_image()->Image:
 
 
 func save_image(image:Image, fileName:String = "export")->void:
-	if OS.get_name() != "HTML5" or !OS.has_feature('JavaScript'):
+	if not is_web():
 		return
 		
 	image.clear_mipmaps()

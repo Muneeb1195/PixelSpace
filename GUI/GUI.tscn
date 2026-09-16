@@ -1,7 +1,7 @@
-[gd_scene load_steps=12 format=3 uid="uid://dsbb0okoxwu3o"]
+[gd_scene format=3 uid="uid://dsbb0okoxwu3o"]
 
 [ext_resource type="PackedScene" uid="uid://c44u5g0iuf311" path="res://BackgroundGenerator/BackgroundGenerator.tscn" id="1"]
-[ext_resource type="Script" path="res://GUI/GUI.gd" id="2"]
+[ext_resource type="Script" uid="uid://34xqsh350l8w" path="res://GUI/GUI.gd" id="2"]
 [ext_resource type="PackedScene" uid="uid://cytukqpi1a1hq" path="res://GUI/SchemeSelectButton.tscn" id="3"]
 [ext_resource type="Theme" uid="uid://t7qc4m724rcq" path="res://GUI/Theme.tres" id="4"]
 [ext_resource type="Texture2D" uid="uid://dmj13e54cck1s" path="res://GUI/transparent.png" id="8"]
@@ -27,7 +27,7 @@ unicode = 101
 [sub_resource type="Shortcut" id="Shortcut_c1vv3"]
 events = [SubResource("InputEventKey_5lc7j")]
 
-[node name="GUI" type="Control"]
+[node name="GUI" type="Control" unique_id=620192795]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -37,41 +37,42 @@ grow_vertical = 2
 theme = ExtResource("4")
 script = ExtResource("2")
 
-[node name="SubViewport" type="SubViewport" parent="."]
+[node name="SubViewport" type="SubViewport" parent="." unique_id=1626218873]
 disable_3d = true
 transparent_bg = true
 gui_snap_controls_to_pixels = false
-size = Vector2i(5000, 5000)
+size = Vector2i(200, 200)
+render_target_update_mode = 1
 
-[node name="BackgroundGenerator" parent="SubViewport" instance=ExtResource("1")]
+[node name="BackgroundGenerator" parent="SubViewport" unique_id=490128243 instance=ExtResource("1")]
 offset_right = 0.0
 offset_bottom = 0.0
 
-[node name="Camera1" type="Camera2D" parent="SubViewport"]
+[node name="Camera1" type="Camera2D" parent="SubViewport" unique_id=929685555]
 offset = Vector2(50, 50)
 zoom = Vector2(0.1, 0.1)
 
-[node name="Camera2" type="Camera2D" parent="SubViewport"]
+[node name="Camera2" type="Camera2D" parent="SubViewport" unique_id=364814888]
 anchor_mode = 0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=470495881]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme_override_constants/separation = 0
 
-[node name="Control" type="Control" parent="HBoxContainer"]
+[node name="Control" type="Control" parent="HBoxContainer" unique_id=1776522364]
 custom_minimum_size = Vector2(600, 600)
 layout_mode = 2
 
-[node name="TextureRect2" type="TextureRect" parent="HBoxContainer/Control"]
+[node name="TextureRect2" type="TextureRect" parent="HBoxContainer/Control" unique_id=1468320019]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 texture = ExtResource("8")
 stretch_mode = 1
 
-[node name="ColorRect" type="ColorRect" parent="HBoxContainer/Control"]
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/Control" unique_id=967210932]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -80,7 +81,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0313726, 0.0784314, 0.117647, 1)
 
-[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/Control"]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/Control" unique_id=1555148510]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -90,20 +91,20 @@ grow_vertical = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 25
 
-[node name="TextureRect" type="TextureRect" parent="HBoxContainer/Control/MarginContainer"]
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/Control/MarginContainer" unique_id=1160112489]
 layout_mode = 2
 texture = SubResource("1")
 expand_mode = 1
 stretch_mode = 6
 metadata/_edit_use_anchors_ = true
 
-[node name="ColorRect" type="ColorRect" parent="HBoxContainer"]
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer" unique_id=737383927]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color(0.0313726, 0.0784314, 0.117647, 1)
 
-[node name="Settings" type="VBoxContainer" parent="HBoxContainer/ColorRect"]
+[node name="Settings" type="VBoxContainer" parent="HBoxContainer/ColorRect" unique_id=713712904]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -115,214 +116,214 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 2
 
-[node name="NewButton" type="Button" parent="HBoxContainer/ColorRect/Settings"]
+[node name="NewButton" type="Button" parent="HBoxContainer/ColorRect/Settings" unique_id=1556534324]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 shortcut = SubResource("Shortcut_1jjyo")
 text = "New Image (Press Enter)"
 
-[node name="Spacer" type="Control" parent="HBoxContainer/ColorRect/Settings"]
+[node name="Spacer" type="Control" parent="HBoxContainer/ColorRect/Settings" unique_id=1952533156]
 custom_minimum_size = Vector2(0, 5)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings"]
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings" unique_id=1681329851]
 layout_mode = 2
 text = "Size (Pixels):"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings" unique_id=1883422199]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/HBoxContainer"]
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/HBoxContainer" unique_id=1039268095]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "width:"
 
-[node name="PixelsWidth" type="SpinBox" parent="HBoxContainer/ColorRect/Settings/HBoxContainer"]
+[node name="PixelsWidth" type="SpinBox" parent="HBoxContainer/ColorRect/Settings/HBoxContainer" unique_id=1230743269]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 100.0
 max_value = 5000.0
 value = 200.0
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings" unique_id=1735650875]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/HBoxContainer2"]
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/HBoxContainer2" unique_id=909297315]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "height:"
 
-[node name="PixelsHeight" type="SpinBox" parent="HBoxContainer/ColorRect/Settings/HBoxContainer2"]
+[node name="PixelsHeight" type="SpinBox" parent="HBoxContainer/ColorRect/Settings/HBoxContainer2" unique_id=407151659]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 100.0
 max_value = 5000.0
 value = 200.0
 
-[node name="Spacer2" type="Control" parent="HBoxContainer/ColorRect/Settings"]
+[node name="Spacer2" type="Control" parent="HBoxContainer/ColorRect/Settings" unique_id=346254054]
 custom_minimum_size = Vector2(0, 5)
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="HBoxContainer/ColorRect/Settings"]
+[node name="Label2" type="Label" parent="HBoxContainer/ColorRect/Settings" unique_id=1405079622]
 layout_mode = 2
 text = "colorscheme:"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/ColorRect/Settings"]
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/ColorRect/Settings" unique_id=2016218733]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/ColorRect/Settings/ScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/ColorRect/Settings/ScrollContainer" unique_id=2112285064]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 2
 
-[node name="Button" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=1875498135 instance=ExtResource("3")]
 layout_mode = 2
 text = " NYX-8"
 alignment = 0
 colorscheme = PackedColorArray(0.00392157, 0.0352941, 0.0588235, 1, 0.0313726, 0.0784314, 0.117647, 1, 0.0588235, 0.164706, 0.247059, 1, 0.12549, 0.223529, 0.309804, 1, 0.305882, 0.286275, 0.372549, 1, 0.505882, 0.384314, 0.443137, 1, 0.6, 0.458824, 0.466667, 1, 0.764706, 0.639216, 0.541176, 1, 0.964706, 0.839216, 0.741176, 1)
 
-[node name="Button4" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button4" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=1362177760 instance=ExtResource("3")]
 layout_mode = 2
 text = " Ammo-8"
 alignment = 0
 colorscheme = PackedColorArray(0, 0.0392157, 0.0117647, 1, 0.0156863, 0.0470588, 0.0235294, 1, 0.0666667, 0.137255, 0.0941176, 1, 0.117647, 0.227451, 0.160784, 1, 0.188235, 0.364706, 0.258824, 1, 0.301961, 0.501961, 0.380392, 1, 0.537255, 0.635294, 0.341176, 1, 0.745098, 0.862745, 0.498039, 1, 0.933333, 1, 0.8, 1)
 
-[node name="Button9" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button9" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=1970234189 instance=ExtResource("3")]
 layout_mode = 2
 text = " Winter Wonderland"
 alignment = 0
 colorscheme = PackedColorArray(0.0666667, 0.0941176, 0.215686, 1, 0.12549, 0.156863, 0.305882, 1, 0.172549, 0.290196, 0.470588, 1, 0.219608, 0.458824, 0.631373, 1, 0.545098, 0.792157, 0.866667, 1, 0.45098, 0.552941, 0.615686, 1, 0.654902, 0.737255, 0.788235, 1, 0.839216, 0.882353, 0.913725, 1, 1, 1, 1, 1)
 
-[node name="Button11" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button11" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=1500595901 instance=ExtResource("3")]
 layout_mode = 2
 text = " Borkfest"
 alignment = 0
 colorscheme = PackedColorArray(0.0901961, 0.0901961, 0.0666667, 1, 0.12549, 0.133333, 0.0823529, 1, 0.227451, 0.156863, 0.00784314, 1, 0.588235, 0.235294, 0.235294, 1, 0.792157, 0.352941, 0.180392, 1, 1, 0.470588, 0.192157, 1, 0.952941, 0.6, 0.286275, 1, 0.921569, 0.760784, 0.458824, 1, 0.87451, 0.843137, 0.521569, 1)
 
-[node name="Button10" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button10" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=1878553156 instance=ExtResource("3")]
 layout_mode = 2
 text = " Submerged Chimera"
 alignment = 0
 colorscheme = PackedColorArray(0.0196078, 0.00784314, 0.0980392, 1, 0.0705882, 0.0588235, 0.156863, 1, 0.180392, 0.117647, 0.360784, 1, 0.427451, 0.258824, 0.6, 1, 0.52549, 0.137255, 0.682353, 1, 0.870588, 0.223529, 0.913725, 1, 0.968627, 0.572549, 0.894118, 1, 1, 0.823529, 0.870588, 1, 0.968627, 0.980392, 0.917647, 1)
 
-[node name="Button6" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button6" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=1557188484 instance=ExtResource("3")]
 layout_mode = 2
 text = " DreamScape-8"
 alignment = 0
 colorscheme = PackedColorArray(0.129412, 0.0980392, 0.129412, 1, 0.329412, 0.2, 0.266667, 1, 0.545098, 0.25098, 0.286275, 1, 0.682353, 0.415686, 0.278431, 1, 0.792157, 0.627451, 0.352941, 1, 0.317647, 0.321569, 0.384314, 1, 0.388235, 0.470588, 0.490196, 1, 0.556863, 0.627451, 0.568627, 1, 0.788235, 0.8, 0.631373, 1)
 
-[node name="Button8" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button8" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=1457318404 instance=ExtResource("3")]
 layout_mode = 2
 text = " Coffee"
 alignment = 0
 colorscheme = PackedColorArray(0, 0, 0, 1, 0, 0, 0, 1, 0.0392157, 0.0392157, 0.0392157, 1, 0.0980392, 0.0980392, 0.0980392, 1, 0.32549, 0.243137, 0.176471, 1, 0.635294, 0.439216, 0.207843, 1, 0.721569, 0.545098, 0.290196, 1, 0.866667, 0.792157, 0.490196, 1, 0.984314, 0.976471, 0.937255, 1)
 
-[node name="Button5" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button5" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=1744580388 instance=ExtResource("3")]
 layout_mode = 2
 text = " Funcky Future-8"
 alignment = 0
 colorscheme = PackedColorArray(0.0705882, 0.0313726, 0.14902, 1, 0.168627, 0.0588235, 0.329412, 1, 0.670588, 0.121569, 0.396078, 1, 1, 0.309804, 0.411765, 1, 1, 0.505882, 0.258824, 1, 1, 0.854902, 0.270588, 1, 0.2, 0.407843, 0.862745, 1, 0.286275, 0.905882, 0.92549, 1, 1, 0.968627, 0.972549, 1)
 
-[node name="Button3" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button3" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=174251587 instance=ExtResource("3")]
 layout_mode = 2
 text = " Pollen-8"
 alignment = 0
 colorscheme = PackedColorArray(0.180392, 0.141176, 0.164706, 1, 0.45098, 0.27451, 0.298039, 1, 0.670588, 0.337255, 0.458824, 1, 0.933333, 0.415686, 0.486275, 1, 1, 0.654902, 0.647059, 1, 0.203922, 0.67451, 0.729412, 1, 0.447059, 0.862745, 0.733333, 1, 1, 0.878431, 0.494118, 1, 1, 0.905882, 0.839216, 1)
 
-[node name="Button7" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button7" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=578312773 instance=ExtResource("3")]
 layout_mode = 2
 text = " Rust Gold-8"
 alignment = 0
 colorscheme = PackedColorArray(0.0313726, 0.0784314, 0.117647, 1, 0.12549, 0.12549, 0.12549, 1, 0.223529, 0.223529, 0.223529, 1, 0.447059, 0.34902, 0.337255, 1, 0.733333, 0.498039, 0.341176, 1, 0.2, 0.109804, 0.0901961, 1, 0.337255, 0.196078, 0.14902, 1, 0.67451, 0.419608, 0.14902, 1, 0.964706, 0.803922, 0.14902, 1)
 
-[node name="Button2" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button2" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=91340534 instance=ExtResource("3")]
 layout_mode = 2
 text = " SLSO-8"
 alignment = 0
 colorscheme = PackedColorArray(0, 0.0901961, 0.168627, 1, 0.0509804, 0.168627, 0.270588, 1, 0.12549, 0.235294, 0.337255, 1, 0.329412, 0.305882, 0.407843, 1, 0.552941, 0.411765, 0.478431, 1, 0.815686, 0.505882, 0.34902, 1, 1, 0.666667, 0.368627, 1, 1, 0.831373, 0.639216, 1, 1, 0.92549, 0.839216, 1)
 
-[node name="Button12" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button12" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=2040189034 instance=ExtResource("3")]
 layout_mode = 2
 text = " Goosebumps Gold"
 alignment = 0
 colorscheme = PackedColorArray(0, 0.00784314, 0.0156863, 1, 0.129412, 0.0980392, 0.109804, 1, 0.215686, 0.137255, 0.396078, 1, 0.25098, 0.294118, 0.466667, 1, 0.352941, 0.521569, 0.643137, 1, 0.580392, 0.0784314, 0.203922, 1, 0.784314, 0.129412, 0.0313726, 1, 0.890196, 0.364706, 0.0313726, 1, 0.819608, 0.623529, 0.133333, 1)
 
-[node name="Button13" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" instance=ExtResource("3")]
+[node name="Button13" parent="HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer" unique_id=957943298 instance=ExtResource("3")]
 layout_mode = 2
 text = " OIL-6"
 alignment = 0
 colorscheme = PackedColorArray(0.0228, 0.0228, 0.04, 1, 0.0666667, 0.0666667, 0.121569, 1, 0.113725, 0.113725, 0.2, 1, 0.152941, 0.152941, 0.266667, 1, 0.286275, 0.301961, 0.494118, 1, 0.545098, 0.427451, 0.611765, 1, 0.776471, 0.623529, 0.647059, 1, 0.94902, 0.827451, 0.670588, 1, 0.984314, 0.960784, 0.937255, 1)
 
-[node name="Spacer3" type="Control" parent="HBoxContainer/ColorRect/Settings"]
+[node name="Spacer3" type="Control" parent="HBoxContainer/ColorRect/Settings" unique_id=624741879]
 custom_minimum_size = Vector2(0, 5)
 layout_mode = 2
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/ColorRect/Settings"]
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/ColorRect/Settings" unique_id=1182541169]
 layout_mode = 2
 columns = 2
 
-[node name="EnableStars" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer"]
+[node name="EnableStars" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer" unique_id=1566341925]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/hover_pressed = SubResource("3")
 button_pressed = true
 text = "stars"
 
-[node name="EnableDust" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer"]
+[node name="EnableDust" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer" unique_id=978459693]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/hover_pressed = SubResource("3")
 button_pressed = true
 text = "dust"
 
-[node name="EnableNebulae" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer"]
+[node name="EnableNebulae" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer" unique_id=1119255306]
 layout_mode = 2
 theme_override_styles/hover_pressed = SubResource("3")
 button_pressed = true
 text = "nebulae"
 
-[node name="EnablePlanets" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer"]
+[node name="EnablePlanets" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer" unique_id=1441338000]
 layout_mode = 2
 theme_override_styles/hover_pressed = SubResource("3")
 button_pressed = true
 text = "planets"
 
-[node name="EnableTile" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer"]
+[node name="EnableTile" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer" unique_id=2011957533]
 layout_mode = 2
 theme_override_styles/hover_pressed = SubResource("3")
 text = "tile"
 
-[node name="EnableReduceBackground" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer"]
+[node name="EnableReduceBackground" type="CheckBox" parent="HBoxContainer/ColorRect/Settings/GridContainer" unique_id=51268398]
 layout_mode = 2
 theme_override_styles/hover_pressed = SubResource("3")
 text = "darken"
 
-[node name="Spacer5" type="Control" parent="HBoxContainer/ColorRect/Settings"]
+[node name="Spacer5" type="Control" parent="HBoxContainer/ColorRect/Settings" unique_id=439087075]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 
-[node name="EnableTransparency" type="CheckBox" parent="HBoxContainer/ColorRect/Settings"]
+[node name="EnableTransparency" type="CheckBox" parent="HBoxContainer/ColorRect/Settings" unique_id=78506589]
 layout_mode = 2
 theme_override_styles/hover_pressed = SubResource("3")
 text = "Transparency"
 
-[node name="Spacer4" type="Control" parent="HBoxContainer/ColorRect/Settings"]
+[node name="Spacer4" type="Control" parent="HBoxContainer/ColorRect/Settings" unique_id=687964803]
 custom_minimum_size = Vector2(0, 5)
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="HBoxContainer/ColorRect/Settings"]
+[node name="Label3" type="Label" parent="HBoxContainer/ColorRect/Settings" unique_id=68940989]
 layout_mode = 2
 text = "export dir : "
 
-[node name="ExportButton" type="Button" parent="HBoxContainer/ColorRect/Settings"]
+[node name="ExportButton" type="Button" parent="HBoxContainer/ColorRect/Settings" unique_id=501854136]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 shortcut = SubResource("Shortcut_c1vv3")
 text = "Export (Press E)"
 
-[node name="SaveTimer" type="Timer" parent="."]
+[node name="SaveTimer" type="Timer" parent="." unique_id=1835552269]
 wait_time = 0.1
 one_shot = true
 
