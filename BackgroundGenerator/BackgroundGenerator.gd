@@ -1,3 +1,4 @@
+class_name BackgroundGenerator
 extends Control
 
 @onready var background : ColorRect = $CanvasLayer/Background
@@ -209,6 +210,8 @@ func toggle_planets() -> void:
 	planetcontainer.visible = !planetcontainer.visible
 	_request_render_once()
 
+## Correct spelling; kept the old name as an alias (it is connected to UI
+## and may be referenced from .tscn files or forks).
 func toggle_transparency() -> void:
 	$CanvasLayer/Background.visible = !$CanvasLayer/Background.visible
 	_request_render_once()
@@ -216,3 +219,45 @@ func toggle_transparency() -> void:
 ## Deprecated alias kept for forks calling the old misspelled name.
 func toggle_transparancy() -> void:
 	toggle_transparency()
+
+## Parallax layer export. Order matters for compositing back to the preview.
+const LAYER_NAMES : Array[String] = ["background", "nebulae", "dust", "stars", "planets"]
+
+var _vis_snapshot : Dictionary = {}
+
+func _layer_nodes() -> Dictionary:
+	return {
+		"background": $CanvasLayer/Background,
+		"nebulae": nebulae,
+		"dust": starstuff,
+		"stars": starcontainer,
+		"planets": planetcontainer,
+	}
+
+## Solo one layer; everything else hides. The background layer stays opaque;
+## every other layer renders over transparency (the viewport uses
+## transparent_bg). Toggle states are snapshotted and restored by
+## capture_layer_end(), so extracting a disabled layer still works.
+func capture_layer_begin(layer : String) -> void:
+	# Snapshot only on the outermost begin so a begin/capture/begin/capture
+	# chain restores the original toggle state, not the previous solo.
+	if _vis_snapshot.is_empty():
+		var nodes : Dictionary = _layer_nodes()
+		for key : String in nodes.keys():
+			_vis_snapshot[key] = (nodes[key] as CanvasItem).visible
+		_vis_snapshot["particles"] = particles.visible
+	var nodes : Dictionary = _layer_nodes()
+	for key : String in nodes.keys():
+		(nodes[key] as CanvasItem).visible = (key == layer)
+	particles.visible = (layer == "stars")
+	_request_render_once()
+
+func capture_layer_end() -> void:
+	if _vis_snapshot.is_empty():
+		return
+	var nodes : Dictionary = _layer_nodes()
+	for key : String in nodes.keys():
+		(nodes[key] as CanvasItem).visible = _vis_snapshot.get(key, true)
+	particles.visible = _vis_snapshot.get("particles", true)
+	_vis_snapshot.clear()
+	_request_render_once()

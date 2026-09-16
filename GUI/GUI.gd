@@ -1,7 +1,7 @@
 extends Control
 
 
-@onready var generator : Control = $SubViewport/BackgroundGenerator
+@onready var generator : BackgroundGenerator = $SubViewport/BackgroundGenerator
 @onready var viewport : SubViewport = $SubViewport
 @onready var global_scheme : GradientTexture2D = preload("res://BackgroundGenerator/Colorscheme.tres")
 @onready var label_3: Label = $HBoxContainer/ColorRect/Settings/Label3
@@ -16,6 +16,7 @@ extends Control
 @onready var batch_export_btn: Button = $HBoxContainer/ColorRect/Settings/BatchRow/BatchExport
 @onready var new_button: Button = $HBoxContainer/ColorRect/Settings/NewButton
 @onready var export_button: Button = $HBoxContainer/ColorRect/Settings/ExportButton
+@onready var layers_check: CheckBox = $HBoxContainer/ColorRect/Settings/LayersCheck
 @onready var auto_counts_box: CheckBox = $HBoxContainer/ColorRect/Settings/AutoCounts
 @onready var planets_slider: HSlider = $HBoxContainer/ColorRect/Settings/PlanetsRow/PlanetsSlider
 @onready var planets_val: Label = $HBoxContainer/ColorRect/Settings/PlanetsRow/PlanetsVal
@@ -153,33 +154,37 @@ func _on_ExportButton_pressed() -> void:
 	viewport.set_update_mode(SubViewport.UPDATE_ONCE)
 	$SaveTimer.start()
 
-func export_image() -> void:
+func export_image(layer : String = "") -> void:
 	var img : Image
 	img = Image.create_empty(new_size.x, new_size.y, false, Image.FORMAT_RGBA8)
 	var viewport_img : Image = viewport.get_texture().get_image()
 
 	img.blit_rect(viewport_img, Rect2(0,0,new_size.x,new_size.y), Vector2(0,0))
 
-	save_image(img)
+	save_image(img, layer)
 
-func save_image(img : Image) -> void:
+func save_image(img : Image, layer : String = "") -> void:
+	# Layers are always PNG: only PNG carries the alpha parallax needs,
+	# and the suffix keeps them next to their composite.
+	var suffix : String = ("_" + layer) if not layer.is_empty() else ""
 	if OS.has_feature("web"):
 		var filesaver : Node = get_tree().root.get_node("/root/HTML5File")
-		filesaver.save_image(img, "Space Background")
+		filesaver.save_image(img, "Space Background" + suffix)
 	else:
 		var stamp : String = Time.get_datetime_string_from_system().replace(":", "-")
 		# Seed in the name: reproducible and collision-free for batch runs
 		# landing inside the same second.
 		var ext : String = "png"
-		if export_format == 1:
-			ext = "jpg"
-		elif export_format == 2:
-			ext = "webp"
-		var target : String = "%s/Space Background %d_%s.%s" % [path, current_seed, stamp, ext]
+		if layer.is_empty():
+			if export_format == 1:
+				ext = "jpg"
+			elif export_format == 2:
+				ext = "webp"
+		var target : String = "%s/Space Background %d_%s%s.%s" % [path, current_seed, stamp, suffix, ext]
 		var err : Error
-		if export_format == 1:
+		if ext == "jpg":
 			err = img.save_jpg(target, export_quality)
-		elif export_format == 2:
+		elif ext == "webp":
 			err = img.save_webp(target, true, export_quality)
 		else:
 			err = img.save_png(target)
@@ -196,6 +201,13 @@ func _on_SaveTimer_timeout() -> void:
 	# Ensure the Camera2 UPDATE_ONCE frame has landed before reading pixels.
 	await RenderingServer.frame_post_draw
 	export_image()
+	if layers_check.button_pressed:
+		for layer : String in BackgroundGenerator.LAYER_NAMES:
+			generator.capture_layer_begin(layer)
+			viewport.set_update_mode(SubViewport.UPDATE_ONCE)
+			await RenderingServer.frame_post_draw
+			export_image(layer)
+		generator.capture_layer_end()
 	$SubViewport/Camera1.enabled = true
 	$SubViewport/Camera2.enabled = false
 	viewport.set_update_mode(SubViewport.UPDATE_ONCE)
