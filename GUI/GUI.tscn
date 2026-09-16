@@ -160,6 +160,19 @@ min_value = 100.0
 max_value = 5000.0
 value = 200.0
 
+[node name="PresetRow" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/PresetRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "preset:"
+
+[node name="PresetOption" type="OptionButton" parent="HBoxContainer/ColorRect/Settings/PresetRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+clip_text = true
+
 [node name="Spacer2" type="Control" parent="HBoxContainer/ColorRect/Settings" unique_id=346254054]
 custom_minimum_size = Vector2(0, 5)
 layout_mode = 2
@@ -434,6 +447,60 @@ text = "Transparency"
 custom_minimum_size = Vector2(0, 5)
 layout_mode = 2
 
+[node name="FormatRow" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/FormatRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "format:"
+
+[node name="FormatOption" type="OptionButton" parent="HBoxContainer/ColorRect/Settings/FormatRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+clip_text = true
+
+[node name="QualRow" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/QualRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "quality:"
+
+[node name="QualitySlider" type="HSlider" parent="HBoxContainer/ColorRect/Settings/QualRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+editable = false
+min_value = 1.0
+max_value = 100.0
+step = 1.0
+value = 90.0
+
+[node name="QualityVal" type="Label" parent="HBoxContainer/ColorRect/Settings/QualRow"]
+layout_mode = 2
+text = "90"
+
+[node name="BatchRow" type="HBoxContainer" parent="HBoxContainer/ColorRect/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/Settings/BatchRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "batch:"
+
+[node name="BatchCount" type="SpinBox" parent="HBoxContainer/ColorRect/Settings/BatchRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 20.0
+value = 4.0
+
+[node name="BatchExport" type="Button" parent="HBoxContainer/ColorRect/Settings/BatchRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Batch export"
+
 [node name="Label3" type="Label" parent="HBoxContainer/ColorRect/Settings" unique_id=68940989]
 layout_mode = 2
 text = "export dir : "
@@ -448,6 +515,10 @@ text = "Export (Press E)"
 wait_time = 0.1
 one_shot = true
 
+[node name="BatchTimer" type="Timer" parent="."]
+wait_time = 0.8
+one_shot = true
+
 [node name="ErrorDialog" type="AcceptDialog" parent="."]
 title = "Export failed"
 dialog_text = "Could not save the image."
@@ -456,6 +527,11 @@ dialog_autowrap = true
 [connection signal="pressed" from="HBoxContainer/ColorRect/Settings/NewButton" to="." method="_on_NewButton_pressed"]
 [connection signal="value_changed" from="HBoxContainer/ColorRect/Settings/HBoxContainer/PixelsWidth" to="." method="_on_PixelsWidth_value_changed"]
 [connection signal="value_changed" from="HBoxContainer/ColorRect/Settings/HBoxContainer2/PixelsHeight" to="." method="_on_PixelsHeight_value_changed"]
+[connection signal="item_selected" from="HBoxContainer/ColorRect/Settings/PresetRow/PresetOption" to="." method="_on_PresetOption_item_selected"]
+[connection signal="item_selected" from="HBoxContainer/ColorRect/Settings/FormatRow/FormatOption" to="." method="_on_FormatOption_item_selected"]
+[connection signal="value_changed" from="HBoxContainer/ColorRect/Settings/QualRow/QualitySlider" to="." method="_on_QualitySlider_value_changed"]
+[connection signal="pressed" from="HBoxContainer/ColorRect/Settings/BatchRow/BatchExport" to="." method="_on_BatchExport_pressed"]
+[connection signal="timeout" from="BatchTimer" to="." method="_on_BatchTimer_timeout"]
 [connection signal="pressed" from="HBoxContainer/ColorRect/Settings/GridContainer/EnableStars" to="." method="_on_EnableStars_pressed"]
 [connection signal="pressed" from="HBoxContainer/ColorRect/Settings/GridContainer/EnableDust" to="." method="_on_EnableDust_pressed"]
 [connection signal="pressed" from="HBoxContainer/ColorRect/Settings/GridContainer/EnableNebulae" to="." method="_on_EnableNebulae_pressed"]

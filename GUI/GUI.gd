@@ -8,6 +8,14 @@ extends Control
 @onready var seed_input: LineEdit = $HBoxContainer/ColorRect/Settings/SeedRow/SeedInput
 @onready var seed_lock: CheckBox = $HBoxContainer/ColorRect/Settings/SeedRow2/SeedLock
 @onready var seed_label: Label = $HBoxContainer/ColorRect/Settings/SeedRow2/SeedLabel
+@onready var preset_option: OptionButton = $HBoxContainer/ColorRect/Settings/PresetRow/PresetOption
+@onready var format_option: OptionButton = $HBoxContainer/ColorRect/Settings/FormatRow/FormatOption
+@onready var quality_slider: HSlider = $HBoxContainer/ColorRect/Settings/QualRow/QualitySlider
+@onready var quality_val: Label = $HBoxContainer/ColorRect/Settings/QualRow/QualityVal
+@onready var batch_count: SpinBox = $HBoxContainer/ColorRect/Settings/BatchRow/BatchCount
+@onready var batch_export_btn: Button = $HBoxContainer/ColorRect/Settings/BatchRow/BatchExport
+@onready var new_button: Button = $HBoxContainer/ColorRect/Settings/NewButton
+@onready var export_button: Button = $HBoxContainer/ColorRect/Settings/ExportButton
 @onready var auto_counts_box: CheckBox = $HBoxContainer/ColorRect/Settings/AutoCounts
 @onready var planets_slider: HSlider = $HBoxContainer/ColorRect/Settings/PlanetsRow/PlanetsSlider
 @onready var planets_val: Label = $HBoxContainer/ColorRect/Settings/PlanetsRow/PlanetsVal
@@ -21,6 +29,11 @@ var path : String
 var _exporting : bool = false
 var current_seed : int = 0
 var seed_locked : bool = false
+var _applying_preset : bool = false
+## 0 = PNG, 1 = JPG, 2 = WebP (desktop only; web download stays PNG).
+var export_format : int = 0
+var export_quality : float = 0.9
+var _batch_remaining : int = 0
 
 func _ready() -> void:
 	randomize()
@@ -28,6 +41,7 @@ func _ready() -> void:
 	seed(current_seed)
 	path = _resolve_export_dir()
 	_apply_platform_resolution_caps()
+	_populate_formats()
 	_connect_scheme_buttons()
 	_generate_new()
 	_update_seed_ui()
@@ -129,7 +143,11 @@ func _on_ExportButton_pressed() -> void:
 	if _exporting:
 		return
 	_exporting = true
-	$HBoxContainer/ColorRect/Settings/ExportButton.disabled = true
+	# Lock the controls that would corrupt a capture in flight (New resizes
+	# the viewport; Batch starts its own capture chain).
+	export_button.disabled = true
+	new_button.disabled = true
+	batch_export_btn.disabled = true
 	$SubViewport/Camera1.enabled = false
 	$SubViewport/Camera2.enabled = true
 	viewport.set_update_mode(SubViewport.UPDATE_ONCE)
@@ -150,8 +168,21 @@ func save_image(img : Image) -> void:
 		filesaver.save_image(img, "Space Background")
 	else:
 		var stamp : String = Time.get_datetime_string_from_system().replace(":", "-")
-		var target : String = path + "/Space Background " + stamp + ".png"
-		var err : Error = img.save_png(target)
+		# Seed in the name: reproducible and collision-free for batch runs
+		# landing inside the same second.
+		var ext : String = "png"
+		if export_format == 1:
+			ext = "jpg"
+		elif export_format == 2:
+			ext = "webp"
+		var target : String = "%s/Space Background %d_%s.%s" % [path, current_seed, stamp, ext]
+		var err : Error
+		if export_format == 1:
+			err = img.save_jpg(target, export_quality)
+		elif export_format == 2:
+			err = img.save_webp(target, true, export_quality)
+		else:
+			err = img.save_png(target)
 		if err != OK:
 			push_error("PixelSpace: failed to save PNG to %s (error %d)" % [path, err])
 			_show_export_error(target, err)
@@ -169,7 +200,49 @@ func _on_SaveTimer_timeout() -> void:
 	$SubViewport/Camera2.enabled = false
 	viewport.set_update_mode(SubViewport.UPDATE_ONCE)
 	_exporting = false
-	$HBoxContainer/ColorRect/Settings/ExportButton.disabled = false
+	if _batch_remaining > 0:
+		_batch_next()
+	else:
+		export_button.disabled = false
+		new_button.disabled = false
+		batch_export_btn.disabled = false
+
+func _populate_formats() -> void:
+	format_option.add_item("PNG")
+	format_option.add_item("JPG")
+	format_option.add_item("WebP")
+
+func _on_FormatOption_item_selected(index : int) -> void:
+	export_format = index
+	quality_slider.editable = index != 0
+
+func _on_QualitySlider_value_changed(value : float) -> void:
+	quality_val.text = str(int(value))
+	export_quality = value / 100.0
+
+## Batch renders N fresh variations back-to-back. Each item waits out the
+## 0.5s particle settle (BatchTimer) before capturing, like a manual export.
+func _on_BatchExport_pressed() -> void:
+	if _exporting or _batch_remaining > 0:
+		return
+	_batch_remaining = int(batch_count.value)
+	export_button.disabled = true
+	new_button.disabled = true
+	batch_export_btn.disabled = true
+	_batch_next()
+
+func _batch_next() -> void:
+	if _batch_remaining <= 0:
+		return
+	_batch_remaining -= 1
+	current_seed = randi()
+	seed(current_seed)
+	_update_seed_ui()
+	_generate_new()
+	$BatchTimer.start()
+
+func _on_BatchTimer_timeout() -> void:
+	_on_ExportButton_pressed()
 
 func select_colorscheme(scheme : PackedColorArray) -> void:
 	$SubViewport/BackgroundGenerator.set_background_color(scheme[0])
@@ -204,10 +277,14 @@ func _on_EnableTile_pressed() -> void:
 func _on_PixelsHeight_value_changed(value : int) -> void:
 	value = clamp(value, 100, _max_export_px())
 	new_size.y = int(value)
+	if not _applying_preset:
+		preset_option.select(0)
 
 func _on_PixelsWidth_value_changed(value : int) -> void:
 	value = clamp(value, 100, _max_export_px())
 	new_size.x = int(value)
+	if not _applying_preset:
+		preset_option.select(0)
 
 
 func _on_EnableTransparency_pressed() -> void:
@@ -232,3 +309,39 @@ func _apply_platform_resolution_caps() -> void:
 	spin_h.max_value = cap
 	new_size.x = mini(new_size.x, cap)
 	new_size.y = mini(new_size.y, cap)
+	_populate_presets()
+
+## Wallpaper-size presets, filtered by the platform cap. The list is built
+## in code (not tscn) so over-cap entries never appear on mobile/web.
+## OptionButton.select() does not emit, so manual SpinBox edits can safely
+## reset the display to Custom via _applying_preset.
+const RES_PRESETS : Array = [
+	["Custom", Vector2i(0, 0)],
+	["HD 1280x720", Vector2i(1280, 720)],
+	["FHD 1920x1080", Vector2i(1920, 1080)],
+	["QHD 2560x1440", Vector2i(2560, 1440)],
+	["4K 3840x2160", Vector2i(3840, 2160)],
+	["Phone 1080x2400", Vector2i(1080, 2400)],
+	["Square 1080", Vector2i(1080, 1080)],
+	["Square 2048", Vector2i(2048, 2048)],
+]
+
+func _populate_presets() -> void:
+	preset_option.clear()
+	var cap : int = _max_export_px()
+	for p : Array in RES_PRESETS:
+		var dims : Vector2i = p[1]
+		if dims.x == 0 or (dims.x <= cap and dims.y <= cap):
+			preset_option.add_item(p[0])
+			preset_option.set_item_metadata(preset_option.item_count - 1, dims)
+
+func _on_PresetOption_item_selected(index : int) -> void:
+	var dims : Vector2i = preset_option.get_item_metadata(index)
+	if dims.x <= 0:
+		return
+	var spin_w : SpinBox = $HBoxContainer/ColorRect/Settings/HBoxContainer/PixelsWidth
+	var spin_h : SpinBox = $HBoxContainer/ColorRect/Settings/HBoxContainer2/PixelsHeight
+	_applying_preset = true
+	spin_w.value = dims.x
+	spin_h.value = dims.y
+	_applying_preset = false
