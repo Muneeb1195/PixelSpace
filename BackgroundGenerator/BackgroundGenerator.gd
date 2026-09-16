@@ -1,3 +1,4 @@
+class_name BackgroundGenerator
 extends Control
 
 @onready var background : ColorRect = $CanvasLayer/Background
@@ -17,26 +18,50 @@ var mirror_size : Vector2i = Vector2(200,200)
 var planet_objects : Array = []
 var star_objects : Array = []
 
-#func _ready() -> void:
-	#OS.low_processor_usage_mode_sleep_usec = 10000
+## User overrides (auto_counts reproduces the legacy random behavior).
+var auto_counts : bool = true
+var planet_count : int = 4
+var star_density : float = 1.0
+var _base_dust_size : float = 10.0
+var _base_nebula_size : float = 10.0
+
+func _ready() -> void:
+	_base_dust_size = float(starstuff.material.get_shader_parameter("size"))
+	_base_nebula_size = float(nebulae.material.get_shader_parameter("size"))
 
 func set_mirror_size(new : Vector2) -> void:
 	mirror_size = new
+
+## The SubViewport runs in UPDATE_ONCE mode (see GUI.tscn) so the heavy
+## full-screen shaders only render on demand. Kick one frame after any
+## visual state change; use _keep_rendering() while particles settle.
+func _request_render_once() -> void:
+	var vp : Viewport = get_viewport()
+	if vp is SubViewport:
+		(vp as SubViewport).set_update_mode(SubViewport.UPDATE_ONCE)
+
+func _keep_rendering() -> void:
+	var vp : Viewport = get_viewport()
+	if vp is SubViewport:
+		(vp as SubViewport).set_update_mode(SubViewport.UPDATE_WHEN_VISIBLE)
 
 func toggle_tile() -> void:
 	should_tile = !should_tile
 	starstuff.material.set_shader_parameter("should_tile", should_tile)
 	nebulae.material.set_shader_parameter("should_tile", should_tile)
-	
+
 	_make_new_planets()
 	_make_new_stars()
+	_request_render_once()
 
 func toggle_reduce_background() -> void:
 	reduce_background = !reduce_background
 	starstuff.material.set_shader_parameter("reduce_background", reduce_background)
 	nebulae.material.set_shader_parameter("reduce_background", reduce_background)
+	_request_render_once()
 
 func generate_new() -> void:
+	_keep_rendering()
 	starstuff.material.set_shader_parameter("seed", randf_range(1.0, 10.0))
 	starstuff.material.set_shader_parameter("pixels", max(size.x, size.y))
 	
@@ -71,17 +96,47 @@ func _make_new_stars() -> void:
 	
 	var star_amount : int = int(max(size.x, size.y) / 20)
 	star_amount = max(star_amount, 1)
-	for i : int in randi()%star_amount:
+	var star_count : int = randi() % star_amount if auto_counts else maxi(0, int(star_amount * star_density))
+	for i : int in star_count:
 		_place_big_star()
-	
+
 func _make_new_planets() -> void:
 	for p : Sprite2D in planet_objects:
 		p.queue_free()
 	planet_objects = []
 
 	var planet_amount : int = randi_range(5,10) if size.x > 1500 else randi_range(2,5)#int(size.x * size.y) / 8000
-	for i : int in randi()%planet_amount:
+	var spawn_count : int = randi() % planet_amount if auto_counts else maxi(0, planet_count)
+	for i : int in spawn_count:
 		_place_planet()
+
+## Slider-driven overrides. Counts regenerate immediately; density scales
+## only apply on the next regenerate unless counts are manual.
+func set_auto_counts(on : bool) -> void:
+	auto_counts = on
+	_make_new_planets()
+	_make_new_stars()
+	_request_render_once()
+
+func set_planet_count(n : int) -> void:
+	planet_count = maxi(0, n)
+	auto_counts = false
+	_make_new_planets()
+	_request_render_once()
+
+func set_star_density(d : float) -> void:
+	star_density = clampf(d, 0.0, 3.0)
+	auto_counts = false
+	_make_new_stars()
+	_request_render_once()
+
+func set_dust_scale(s : float) -> void:
+	starstuff.material.set_shader_parameter("size", _base_dust_size * clampf(s, 0.1, 2.0))
+	_request_render_once()
+
+func set_nebula_scale(s : float) -> void:
+	nebulae.material.set_shader_parameter("size", _base_nebula_size * clampf(s, 0.1, 2.0))
+	_request_render_once()
 
 func _set_new_colors(new_scheme : GradientTexture2D, new_background : Color) -> void:
 	colorscheme = new_scheme
@@ -95,6 +150,7 @@ func _set_new_colors(new_scheme : GradientTexture2D, new_background : Color) -> 
 		p.material.set_shader_parameter("colorscheme", colorscheme)
 	for s : Sprite2D in star_objects:
 		s.material.set_shader_parameter("colorscheme", colorscheme)
+	_request_render_once()
 
 func _place_planet() -> void:
 	var min_size : int = min(size.x, size.y)
@@ -129,23 +185,79 @@ func _place_big_star() -> void:
 func _on_PauseParticles_timeout() -> void:
 	particles.speed_scale = 0.0
 	particles.emitting = false
+	# Particles have settled: freeze the viewport until the next change.
+	_request_render_once()
 
 func set_background_color(c : Color) -> void:
 	background.color = c
 	nebulae.material.set_shader_parameter("background_color", c)
+	_request_render_once()
 
 func toggle_dust() -> void:
 	starstuff.visible = !starstuff.visible
+	_request_render_once()
 
 func toggle_stars() -> void:
 	starcontainer.visible = !starcontainer.visible
 	particles.visible = !particles.visible
+	_request_render_once()
 
 func toggle_nebulae() -> void:
 	$Nebulae.visible = !$Nebulae.visible
+	_request_render_once()
 
 func toggle_planets() -> void:
 	planetcontainer.visible = !planetcontainer.visible
+	_request_render_once()
 
-func toggle_transparancy() -> void:
+## Correct spelling; kept the old name as an alias (it is connected to UI
+## and may be referenced from .tscn files or forks).
+func toggle_transparency() -> void:
 	$CanvasLayer/Background.visible = !$CanvasLayer/Background.visible
+	_request_render_once()
+
+## Deprecated alias kept for forks calling the old misspelled name.
+func toggle_transparancy() -> void:
+	toggle_transparency()
+
+## Parallax layer export. Order matters for compositing back to the preview.
+const LAYER_NAMES : Array[String] = ["background", "nebulae", "dust", "stars", "planets"]
+
+var _vis_snapshot : Dictionary = {}
+
+func _layer_nodes() -> Dictionary:
+	return {
+		"background": $CanvasLayer/Background,
+		"nebulae": nebulae,
+		"dust": starstuff,
+		"stars": starcontainer,
+		"planets": planetcontainer,
+	}
+
+## Solo one layer; everything else hides. The background layer stays opaque;
+## every other layer renders over transparency (the viewport uses
+## transparent_bg). Toggle states are snapshotted and restored by
+## capture_layer_end(), so extracting a disabled layer still works.
+func capture_layer_begin(layer : String) -> void:
+	# Snapshot only on the outermost begin so a begin/capture/begin/capture
+	# chain restores the original toggle state, not the previous solo.
+	if _vis_snapshot.is_empty():
+		var nodes : Dictionary = _layer_nodes()
+		for key : String in nodes.keys():
+			_vis_snapshot[key] = (nodes[key] as CanvasItem).visible
+		_vis_snapshot["particles"] = particles.visible
+	var nodes : Dictionary = _layer_nodes()
+	for key : String in nodes.keys():
+		(nodes[key] as CanvasItem).visible = (key == layer)
+	particles.visible = (layer == "stars")
+	_request_render_once()
+
+func capture_layer_end() -> void:
+	if _vis_snapshot.is_empty():
+		return
+	var nodes : Dictionary = _layer_nodes()
+	for key : String in nodes.keys():
+		(nodes[key] as CanvasItem).visible = _vis_snapshot.get(key, true)
+	particles.visible = _vis_snapshot.get("particles", true)
+	_vis_snapshot.clear()
+	_request_render_once()

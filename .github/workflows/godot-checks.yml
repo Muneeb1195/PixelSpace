@@ -1,0 +1,47 @@
+# Validates the project on every push/PR without needing a GPU:
+# headless import must succeed and every script must parse under Godot 4.7.
+# Pixel-parity (needs a real renderer) stays a manual step — see
+# tests/parity_capture.gd for the harness and invocation.
+name: godot-checks
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+env:
+  GODOT_VERSION: 4.7.2
+  GODOT_BIN: ${{ github.workspace }}/godot/Godot_v4.7.2-stable_linux.x86_64
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Godot
+        run: |
+          mkdir -p godot
+          cd godot
+          curl -sL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -o godot.zip
+          chmod +x "Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+
+      - name: Headless import
+        run: |
+          out=$(${GODOT_BIN} --headless --path . --import 2>&1)
+          echo "$out"
+          echo "$out" | grep -iE "SCRIPT ERROR" && exit 1 || true
+
+      - name: Script syntax checks
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            res="res://${f#./}"
+            echo "== $res"
+            out=$(${GODOT_BIN} --headless --path . --check-only --script "$res" 2>&1 | grep -v "^Godot Engine" || true)
+            if [ -n "$out" ]; then echo "$out"; fail=1; fi
+          done < <(find . -path ./android -prune -o -name "*.gd" -print | grep -v "^\./\.godot/")
+          echo "== scene smoke run"
+          if ${GODOT_BIN} --headless --path . --quit-after 120 res://GUI/GUI.tscn 2>&1 | grep -iE "SCRIPT ERROR"; then fail=1; fi
+          exit $fail

@@ -2,8 +2,13 @@ extends Node
 
 signal InFocus
 
+## Godot 4 reports the web platform as "Web" (not "HTML5") and exposes it
+## via the "web" feature flag. Centralize the check here.
+static func is_web() -> bool:
+	return OS.has_feature("web")
+
 func _ready():
-	if OS.get_name() == "HTML5" and OS.has_feature('JavaScript'):
+	if is_web():
 		_define_js()
 
 
@@ -51,8 +56,8 @@ func _define_js()->void:
 	
 	
 func load_image()->Image:
-	if OS.get_name() != "HTML5" or !OS.has_feature('JavaScript'):
-		return
+	if not is_web():
+		return null
 		
 	#Execute js function
 	JavaScriptBridge.eval("upload();", true)	#opens promt for choosing file
@@ -64,8 +69,7 @@ func load_image()->Image:
 	await get_tree().create_timer(0.1).timeout	#give some time for async js data load
 	
 	if JavaScriptBridge.eval("canceled;", true):	# if File Dialog closed w/o file
-		#label.text = "Canceled prompt"
-		return
+		return null
 	
 	# use data from png data
 	#label.text = "Load image"
@@ -90,26 +94,15 @@ func load_image()->Image:
 		"image/webp":
 			image_error = image.load_webp_from_buffer(imageData)
 		var invalidType:
-			#label.text = "Unsupported file format - %s." % invalidType
-			return
+			push_warning("PixelSpace: unsupported web upload type %s." % invalidType)
+			return null
 	if image_error:
-		#label.text = "An error occurred while trying to display the image."
-		return
-	else:
-		return image
-		# Display texture
-		var tex = ImageTexture.new()
-		tex.create_from_image(image) #,0 # Flag = 0 or else export is fucked!
-		Sprite2D.texture = tex
-		#loadedImage = image # Keep Image for later, just in case...
-		#loadedImageName = imageName
-		#label.text = "Image %s loaded as %s." % [imageName, imageType]
-		return
-	#label.text = "Something went wrong"
+		return null
+	return image
 
 
 func save_image(image:Image, fileName:String = "export")->void:
-	if OS.get_name() != "HTML5" or !OS.has_feature('JavaScript'):
+	if not is_web():
 		return
 		
 	image.clear_mipmaps()
