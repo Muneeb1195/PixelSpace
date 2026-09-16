@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=20 format=3 uid="uid://t7qc4m724rcq"]
+[gd_resource type="Theme" format=3 uid="uid://t7qc4m724rcq"]
 
 [ext_resource type="Texture2D" uid="uid://cdav5ggg5hoc2" path="res://GUI/empty.png" id="1"]
 [ext_resource type="FontFile" uid="uid://bmo2s8s6mgunb" path="res://GUI/Kenney Mini.ttf" id="1_jl2h3"]

@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://c36q36b0kvj40"]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://c36q36b0kvj40"]
 
 [ext_resource type="Texture2D" uid="uid://khlkd5x01wx0" path="res://BackgroundGenerator/Colorscheme.tres" id="1_7mhbn"]
 
@@ -201,23 +201,23 @@ shader_parameter/orbit_velocity = 0.0
 shader_parameter/linear_accel = 0.0
 shader_parameter/radial_accel = 0.0
 shader_parameter/tangent_accel = 0.0
-shader_parameter/damping = null
+shader_parameter/damping = 0.0
 shader_parameter/scale = 1.0
-shader_parameter/anim_speed = null
-shader_parameter/anim_offset = null
-shader_parameter/initial_linear_velocity_random = null
+shader_parameter/anim_speed = 0.0
+shader_parameter/anim_offset = 0.0
+shader_parameter/initial_linear_velocity_random = 0.0
 shader_parameter/initial_angle_random = 0.0
 shader_parameter/angular_velocity_random = 0.0
 shader_parameter/orbit_velocity_random = 0.0
 shader_parameter/linear_accel_random = 0.0
 shader_parameter/radial_accel_random = 0.0
 shader_parameter/tangent_accel_random = 0.0
-shader_parameter/damping_random = null
+shader_parameter/damping_random = 0.0
 shader_parameter/scale_random = 0.0
-shader_parameter/anim_speed_random = null
-shader_parameter/anim_offset_random = null
-shader_parameter/lifetime_randomness = null
-shader_parameter/emission_box_extents = null
+shader_parameter/anim_speed_random = 0.0
+shader_parameter/anim_offset_random = 0.0
+shader_parameter/lifetime_randomness = 0.0
+shader_parameter/emission_box_extents = Vector3(0, 0, 0)
 shader_parameter/trail_divisor = 0
 shader_parameter/gravity = Vector3(0, 0, 0)
 shader_parameter/colorscheme = ExtResource("1_7mhbn")
