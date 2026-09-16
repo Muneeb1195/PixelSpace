@@ -4,26 +4,28 @@ extends Control
 @onready var generator : BackgroundGenerator = $SubViewport/BackgroundGenerator
 @onready var viewport : SubViewport = $SubViewport
 @onready var global_scheme : GradientTexture2D = preload("res://BackgroundGenerator/Colorscheme.tres")
-@onready var label_3: Label = $HBoxContainer/ColorRect/Settings/Label3
-@onready var seed_input: LineEdit = $HBoxContainer/ColorRect/Settings/SeedRow/SeedInput
-@onready var seed_lock: CheckBox = $HBoxContainer/ColorRect/Settings/SeedRow2/SeedLock
-@onready var seed_label: Label = $HBoxContainer/ColorRect/Settings/SeedRow2/SeedLabel
-@onready var preset_option: OptionButton = $HBoxContainer/ColorRect/Settings/PresetRow/PresetOption
-@onready var format_option: OptionButton = $HBoxContainer/ColorRect/Settings/FormatRow/FormatOption
-@onready var quality_slider: HSlider = $HBoxContainer/ColorRect/Settings/QualRow/QualitySlider
-@onready var quality_val: Label = $HBoxContainer/ColorRect/Settings/QualRow/QualityVal
-@onready var batch_count: SpinBox = $HBoxContainer/ColorRect/Settings/BatchRow/BatchCount
-@onready var batch_export_btn: Button = $HBoxContainer/ColorRect/Settings/BatchRow/BatchExport
-@onready var new_button: Button = $HBoxContainer/ColorRect/Settings/NewButton
-@onready var export_button: Button = $HBoxContainer/ColorRect/Settings/ExportButton
-@onready var layers_check: CheckBox = $HBoxContainer/ColorRect/Settings/LayersCheck
-@onready var auto_counts_box: CheckBox = $HBoxContainer/ColorRect/Settings/AutoCounts
-@onready var planets_slider: HSlider = $HBoxContainer/ColorRect/Settings/PlanetsRow/PlanetsSlider
-@onready var planets_val: Label = $HBoxContainer/ColorRect/Settings/PlanetsRow/PlanetsVal
-@onready var stars_slider: HSlider = $HBoxContainer/ColorRect/Settings/StarsRow/StarsSlider
-@onready var stars_val: Label = $HBoxContainer/ColorRect/Settings/StarsRow/StarsVal
-@onready var dust_val: Label = $HBoxContainer/ColorRect/Settings/DustRow/DustVal
-@onready var nebula_val: Label = $HBoxContainer/ColorRect/Settings/NebulaRow/NebulaVal
+@onready var label_3: Label = $HBoxContainer/ColorRect/SettingsScroll/Settings/Label3
+@onready var seed_input: LineEdit = $HBoxContainer/ColorRect/SettingsScroll/Settings/SeedRow/SeedInput
+@onready var seed_lock: CheckBox = $HBoxContainer/ColorRect/SettingsScroll/Settings/SeedRow2/SeedLock
+@onready var seed_label: Label = $HBoxContainer/ColorRect/SettingsScroll/Settings/SeedRow2/SeedLabel
+@onready var preset_option: OptionButton = $HBoxContainer/ColorRect/SettingsScroll/Settings/PresetRow/PresetOption
+@onready var format_option: OptionButton = $HBoxContainer/ColorRect/SettingsScroll/Settings/FormatRow/FormatOption
+@onready var quality_slider: HSlider = $HBoxContainer/ColorRect/SettingsScroll/Settings/QualRow/QualitySlider
+@onready var quality_val: Label = $HBoxContainer/ColorRect/SettingsScroll/Settings/QualRow/QualityVal
+@onready var batch_count: SpinBox = $HBoxContainer/ColorRect/SettingsScroll/Settings/BatchRow/BatchCount
+@onready var batch_export_btn: Button = $HBoxContainer/ColorRect/SettingsScroll/Settings/BatchRow/BatchExport
+@onready var new_button: Button = $HBoxContainer/ColorRect/SettingsScroll/Settings/NewButton
+@onready var export_button: Button = $HBoxContainer/ColorRect/SettingsScroll/Settings/ExportButton
+@onready var layers_check: CheckBox = $HBoxContainer/ColorRect/SettingsScroll/Settings/LayersCheck
+@onready var layout_box: BoxContainer = $HBoxContainer
+@onready var preview_box: Control = $HBoxContainer/Control
+@onready var auto_counts_box: CheckBox = $HBoxContainer/ColorRect/SettingsScroll/Settings/AutoCounts
+@onready var planets_slider: HSlider = $HBoxContainer/ColorRect/SettingsScroll/Settings/PlanetsRow/PlanetsSlider
+@onready var planets_val: Label = $HBoxContainer/ColorRect/SettingsScroll/Settings/PlanetsRow/PlanetsVal
+@onready var stars_slider: HSlider = $HBoxContainer/ColorRect/SettingsScroll/Settings/StarsRow/StarsSlider
+@onready var stars_val: Label = $HBoxContainer/ColorRect/SettingsScroll/Settings/StarsRow/StarsVal
+@onready var dust_val: Label = $HBoxContainer/ColorRect/SettingsScroll/Settings/DustRow/DustVal
+@onready var nebula_val: Label = $HBoxContainer/ColorRect/SettingsScroll/Settings/NebulaRow/NebulaVal
 
 var new_size : Vector2i = Vector2i(200,200)
 var path : String
@@ -50,6 +52,18 @@ func _ready() -> void:
 	if OS.get_name() == "Android":
 		OS.request_permissions()
 	label_3.text += path
+	_update_orientation.call_deferred()
+
+func _notification(what : int) -> void:
+	if what == NOTIFICATION_RESIZED and is_node_ready():
+		_update_orientation()
+
+## Narrow windows (phones, portrait) stack the preview over the settings
+## instead of beside them. BoxContainer.vertical flips HBox behavior in place.
+func _update_orientation() -> void:
+	var portrait := size.x > 0.0 and size.x < size.y
+	layout_box.vertical = portrait
+	preview_box.custom_minimum_size = Vector2(320, 320) if portrait else Vector2(600, 600)
 
 ## OS.get_system_dir can return an empty path (e.g. sandboxed platforms or
 ## denied storage); fall back to the app's user data dir so export never
@@ -74,10 +88,13 @@ func _generate_new() -> void:
 	else:
 		aspect = Vector2(1.0, new_size.x / new_size.y)
 	
-	$HBoxContainer/Control/MarginContainer/TextureRect.size = aspect * 600
+	# Preview pixel size follows the actual preview width so portrait
+	# layouts don't force a 600px-wide TextureRect into a narrow column.
+	var preview_px : float = minf(600.0, maxf(320.0, preview_box.size.x))
+	$HBoxContainer/Control/MarginContainer/TextureRect.size = aspect * preview_px
 
 	await get_tree().process_frame
-	$HBoxContainer/Control/MarginContainer/TextureRect.size = Vector2(600,600)
+	$HBoxContainer/Control/MarginContainer/TextureRect.size = Vector2(preview_px, preview_px)
 	generator.generate_new()
 
 func _on_NewButton_pressed() -> void:
@@ -263,7 +280,7 @@ func select_colorscheme(scheme : PackedColorArray) -> void:
 ## Preset buttons announce themselves via `scheme_chosen`; wiring by signal
 ## keeps this working for any number of presets and any root node name.
 func _connect_scheme_buttons() -> void:
-	var list : VBoxContainer = $HBoxContainer/ColorRect/Settings/ScrollContainer/VBoxContainer
+	var list : VBoxContainer = $HBoxContainer/ColorRect/SettingsScroll/Settings/ScrollContainer/VBoxContainer
 	for child : Node in list.get_children():
 		if child.has_signal("scheme_chosen"):
 			child.connect("scheme_chosen", select_colorscheme)
@@ -315,8 +332,8 @@ func _max_export_px() -> int:
 
 func _apply_platform_resolution_caps() -> void:
 	var cap : int = _max_export_px()
-	var spin_w : SpinBox = $HBoxContainer/ColorRect/Settings/HBoxContainer/PixelsWidth
-	var spin_h : SpinBox = $HBoxContainer/ColorRect/Settings/HBoxContainer2/PixelsHeight
+	var spin_w : SpinBox = $HBoxContainer/ColorRect/SettingsScroll/Settings/HBoxContainer/PixelsWidth
+	var spin_h : SpinBox = $HBoxContainer/ColorRect/SettingsScroll/Settings/HBoxContainer2/PixelsHeight
 	spin_w.max_value = cap
 	spin_h.max_value = cap
 	new_size.x = mini(new_size.x, cap)
@@ -351,8 +368,8 @@ func _on_PresetOption_item_selected(index : int) -> void:
 	var dims : Vector2i = preset_option.get_item_metadata(index)
 	if dims.x <= 0:
 		return
-	var spin_w : SpinBox = $HBoxContainer/ColorRect/Settings/HBoxContainer/PixelsWidth
-	var spin_h : SpinBox = $HBoxContainer/ColorRect/Settings/HBoxContainer2/PixelsHeight
+	var spin_w : SpinBox = $HBoxContainer/ColorRect/SettingsScroll/Settings/HBoxContainer/PixelsWidth
+	var spin_h : SpinBox = $HBoxContainer/ColorRect/SettingsScroll/Settings/HBoxContainer2/PixelsHeight
 	_applying_preset = true
 	spin_w.value = dims.x
 	spin_h.value = dims.y
